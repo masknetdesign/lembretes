@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Header from '@/components/Header';
 import BillForm from '@/components/BillForm';
@@ -6,12 +7,26 @@ import { Bill, BillFormData } from '@/types';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { useNotifications } from '@/hooks/useNotifications';
 import { toast } from 'sonner';
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 
 const Index = () => {
   const [bills, setBills] = useLocalStorage<Bill[]>('bills', []);
   const [isLoading, setIsLoading] = useState(true);
+  const [showPermissionDialog, setShowPermissionDialog] = useState(false);
   
-  const { clearCheckedNotifications } = useNotifications(bills);
+  const { 
+    clearCheckedNotifications, 
+    requestNotificationPermission, 
+    notificationPermission 
+  } = useNotifications(bills);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -20,6 +35,18 @@ const Index = () => {
     
     return () => clearTimeout(timer);
   }, []);
+  
+  // Check notification permission on load
+  useEffect(() => {
+    if (notificationPermission === 'default') {
+      setShowPermissionDialog(true);
+    }
+  }, [notificationPermission]);
+  
+  const handleRequestPermission = async () => {
+    await requestNotificationPermission();
+    setShowPermissionDialog(false);
+  };
   
   const handleAddBill = (formData: BillFormData) => {
     const newBill: Bill = {
@@ -74,6 +101,26 @@ const Index = () => {
           <p>Lembrete de Boletos &copy; {new Date().getFullYear()}</p>
         </footer>
       </div>
+      
+      <Dialog open={showPermissionDialog} onOpenChange={setShowPermissionDialog}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Permitir notificações</DialogTitle>
+            <DialogDescription>
+              Para receber alertas de vencimentos mesmo com a tela desligada ou aplicativo em segundo plano,
+              precisamos da sua permissão para enviar notificações.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowPermissionDialog(false)}>
+              Mais tarde
+            </Button>
+            <Button onClick={handleRequestPermission}>
+              Permitir notificações
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
