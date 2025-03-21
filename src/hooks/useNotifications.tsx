@@ -115,7 +115,7 @@ export function useNotifications(bills: Bill[]) {
             registration.showNotification(title, {
               body: description,
               icon: '/favicon.ico',
-              vibrate: [200, 100, 200],
+              badge: '/favicon.ico',
               sound: '/notification-sound.mp3',
               tag: `bill-${bill.id}-${type}`,
               requireInteraction: true
