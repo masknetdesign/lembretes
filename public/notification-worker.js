@@ -22,7 +22,8 @@ self.addEventListener('push', event => {
         action: 'view',
         title: 'Ver Boleto'
       }
-    ]
+    ],
+    requireInteraction: true // Force the notification to remain until user interacts with it
   };
 
   event.waitUntil(
@@ -32,6 +33,16 @@ self.addEventListener('push', event => {
 
 self.addEventListener('notificationclick', event => {
   event.notification.close();
+  
+  // Send message to all clients that notification was clicked
+  self.clients.matchAll().then(clients => {
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'NOTIFICATION_CLICKED',
+        tag: event.notification.tag
+      });
+    });
+  });
   
   if (event.action === 'view') {
     event.waitUntil(

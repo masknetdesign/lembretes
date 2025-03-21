@@ -9,6 +9,7 @@ export function useNotifications(bills: Bill[]) {
   const checkedBillsRef = useRef<Set<string>>(new Set());
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  const soundIntervalRef = useRef<number | null>(null);
   
   // Register service worker for background notifications
   useEffect(() => {
@@ -27,16 +28,60 @@ export function useNotifications(bills: Bill[]) {
       setNotificationPermission(Notification.permission);
     }
     
-    // Initialize audio element for notification sound
+    // Initialize audio element for notification sound with higher volume
     audioRef.current = new Audio('/notification-sound.mp3');
+    audioRef.current.volume = 1.0; // Max volume
+    audioRef.current.loop = true;  // Loop the sound
+    
+    // Add listener for when the tab visibility changes
+    document.addEventListener('visibilitychange', stopSound);
+    
+    // Add listener for notification clicks
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'NOTIFICATION_CLICKED') {
+          stopSound();
+        }
+      });
+    }
     
     return () => {
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.currentTime = 0;
+      stopSound();
+      document.removeEventListener('visibilitychange', stopSound);
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.removeEventListener('message', stopSound);
       }
     };
   }, []);
+  
+  // Stop sound function
+  const stopSound = () => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    }
+    
+    if (soundIntervalRef.current) {
+      clearInterval(soundIntervalRef.current);
+      soundIntervalRef.current = null;
+    }
+  };
+  
+  // Play continuous sound function
+  const playAlertSound = () => {
+    stopSound(); // Stop any existing sound first
+    
+    if (audioRef.current) {
+      audioRef.current.play().catch(err => console.error('Error playing sound:', err));
+      
+      // Ensure sound keeps playing (some browsers might stop it)
+      soundIntervalRef.current = window.setInterval(() => {
+        if (audioRef.current && audioRef.current.paused) {
+          audioRef.current.play().catch(err => console.error('Error playing sound:', err));
+        }
+      }, 3000);
+    }
+  };
   
   // Request notification permission if not granted
   const requestNotificationPermission = async () => {
@@ -104,10 +149,8 @@ export function useNotifications(bills: Bill[]) {
       // Show browser notification
       if (Notification.permission === 'granted') {
         try {
-          // Play sound
-          if (audioRef.current) {
-            audioRef.current.play().catch(err => console.error('Error playing sound:', err));
-          }
+          // Play sound continuously until interaction
+          playAlertSound();
           
           // Create notification
           navigator.serviceWorker.ready.then(registration => {
@@ -221,10 +264,8 @@ export function useNotifications(bills: Bill[]) {
           );
           checkedBillsRef.current.add(`${bill.id}-24h`);
           
-          // Play sound
-          if (audioRef.current) {
-            audioRef.current.play().catch(err => console.error('Error playing sound:', err));
-          }
+          // Play sound continuously
+          playAlertSound();
         }
         
         if (isAboutToExpire && !checkedBillsRef.current.has(`${bill.id}-2h`)) {
@@ -241,10 +282,8 @@ export function useNotifications(bills: Bill[]) {
           );
           checkedBillsRef.current.add(`${bill.id}-2h`);
           
-          // Play sound
-          if (audioRef.current) {
-            audioRef.current.play().catch(err => console.error('Error playing sound:', err));
-          }
+          // Play sound continuously
+          playAlertSound();
         }
         
         if (justExpired && !checkedBillsRef.current.has(`${bill.id}-expired`)) {
@@ -261,10 +300,8 @@ export function useNotifications(bills: Bill[]) {
           );
           checkedBillsRef.current.add(`${bill.id}-expired`);
           
-          // Play sound
-          if (audioRef.current) {
-            audioRef.current.play().catch(err => console.error('Error playing sound:', err));
-          }
+          // Play sound continuously
+          playAlertSound();
         }
       });
     };
@@ -279,6 +316,7 @@ export function useNotifications(bills: Bill[]) {
   // Function to clear checked notifications
   const clearCheckedNotifications = () => {
     checkedBillsRef.current.clear();
+    stopSound();
   };
   
   return { 
@@ -287,3 +325,4 @@ export function useNotifications(bills: Bill[]) {
     notificationPermission
   };
 }
+
