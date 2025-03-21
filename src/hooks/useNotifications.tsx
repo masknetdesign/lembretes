@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useState } from 'react';
 import { format, isAfter, isBefore, parseISO, subHours } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -116,7 +115,6 @@ export function useNotifications(bills: Bill[]) {
               body: description,
               icon: '/favicon.ico',
               badge: '/favicon.ico',
-              sound: '/notification-sound.mp3',
               tag: `bill-${bill.id}-${type}`,
               requireInteraction: true
             });

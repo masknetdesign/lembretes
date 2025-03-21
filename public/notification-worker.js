@@ -14,7 +14,6 @@ self.addEventListener('push', event => {
     body: data.description,
     icon: '/favicon.ico',
     badge: '/favicon.ico',
-    sound: '/notification-sound.mp3',
     data: {
       url: self.location.origin
     },
