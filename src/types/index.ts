@@ -10,3 +10,10 @@ export interface Bill {
 }
 
 export type BillFormData = Omit<Bill, 'id' | 'isPaid' | 'createdAt'>;
+
+export interface NotificationInfo {
+  id: string;
+  billId: string;
+  type: 'warning' | 'urgent' | 'expired';
+  shown: boolean;
+}

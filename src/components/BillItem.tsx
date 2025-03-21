@@ -6,6 +6,7 @@ import { Calendar, DollarSign, Clock, CheckCircle, AlertCircle } from 'lucide-re
 import { Bill } from '@/types';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
+import BillNotificationBadge from './BillNotificationBadge';
 
 interface BillItemProps {
   bill: Bill;
@@ -19,6 +20,8 @@ const BillItem: React.FC<BillItemProps> = ({ bill, onTogglePaid }) => {
   const isOverdue = !bill.isPaid && isBefore(dueDateObj, now);
   const isDueSoon = !bill.isPaid && !isOverdue && 
     isBefore(dueDateObj, new Date(now.getTime() + 3 * 24 * 60 * 60 * 1000)); // 3 days
+  const isUrgent = !bill.isPaid && !isOverdue &&
+    isBefore(dueDateObj, new Date(now.getTime() + 24 * 60 * 60 * 1000)); // 24 hours
   
   return (
     <div 
@@ -26,11 +29,21 @@ const BillItem: React.FC<BillItemProps> = ({ bill, onTogglePaid }) => {
         "glass-card p-4 transition-all duration-300 animate-slide-up hover:translate-y-[-2px]",
         bill.isPaid ? "border-l-4 border-l-green-400" : 
         isOverdue ? "border-l-4 border-l-destructive" : 
+        isUrgent ? "border-l-4 border-l-orange-400" :
         isDueSoon ? "border-l-4 border-l-amber-400" : ""
       )}
     >
       <div className="flex justify-between items-start mb-2">
-        <h3 className="font-medium truncate">{bill.name}</h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-medium truncate">{bill.name}</h3>
+          {!bill.isPaid && (
+            <>
+              {isOverdue && <BillNotificationBadge type="expired" />}
+              {!isOverdue && isUrgent && <BillNotificationBadge type="urgent" />}
+              {!isOverdue && !isUrgent && isDueSoon && <BillNotificationBadge type="warning" />}
+            </>
+          )}
+        </div>
         <div className="flex items-center space-x-2 ml-2">
           <span className="text-sm text-muted-foreground">
             {bill.isPaid ? 'Pago' : 'Pendente'}
@@ -75,6 +88,11 @@ const BillItem: React.FC<BillItemProps> = ({ bill, onTogglePaid }) => {
             <>
               <AlertCircle className="h-4 w-4 text-destructive mr-1" />
               <span className="text-xs text-destructive">Vencido</span>
+            </>
+          ) : isUrgent ? (
+            <>
+              <AlertCircle className="h-4 w-4 text-orange-500 mr-1" />
+              <span className="text-xs text-orange-500">Vence em menos de 24h</span>
             </>
           ) : isDueSoon ? (
             <>

@@ -5,11 +5,15 @@ import BillForm from '@/components/BillForm';
 import BillList from '@/components/BillList';
 import { Bill, BillFormData } from '@/types';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
+import { useNotifications } from '@/hooks/useNotifications';
 import { toast } from 'sonner';
 
 const Index = () => {
   const [bills, setBills] = useLocalStorage<Bill[]>('bills', []);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Inicializa o sistema de notificações
+  const { clearCheckedNotifications } = useNotifications(bills);
 
   useEffect(() => {
     // Simulate loading to show smooth animations
@@ -42,6 +46,11 @@ const Index = () => {
     toast.success(
       isPaid ? 'Boleto marcado como pago' : 'Boleto marcado como pendente'
     );
+    
+    // Limpar notificações verificadas se o boleto foi marcado como pago
+    if (isPaid) {
+      clearCheckedNotifications();
+    }
   };
   
   if (isLoading) {
