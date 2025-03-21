@@ -76,6 +76,11 @@ const Index = () => {
     }
   };
   
+  const handleDeleteBill = (id: string) => {
+    setBills((prevBills) => prevBills.filter((bill) => bill.id !== id));
+    toast.success('Boleto excluído com sucesso');
+  };
+  
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -94,7 +99,11 @@ const Index = () => {
         
         <div className="space-y-6">
           <BillForm onSubmit={handleAddBill} />
-          <BillList bills={bills} onTogglePaid={handleTogglePaid} />
+          <BillList 
+            bills={bills} 
+            onTogglePaid={handleTogglePaid}
+            onDeleteBill={handleDeleteBill}
+          />
         </div>
         
         <footer className="mt-12 text-center text-xs text-muted-foreground">

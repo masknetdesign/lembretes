@@ -10,9 +10,10 @@ import { cn } from '@/lib/utils';
 interface BillListProps {
   bills: Bill[];
   onTogglePaid: (id: string, isPaid: boolean) => void;
+  onDeleteBill?: (id: string) => void;
 }
 
-const BillList: React.FC<BillListProps> = ({ bills, onTogglePaid }) => {
+const BillList: React.FC<BillListProps> = ({ bills, onTogglePaid, onDeleteBill }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState<'date' | 'name' | 'amount'>('date');
   const [showPaid, setShowPaid] = useState(true);
@@ -128,6 +129,7 @@ const BillList: React.FC<BillListProps> = ({ bills, onTogglePaid }) => {
                     key={bill.id} 
                     bill={bill} 
                     onTogglePaid={onTogglePaid} 
+                    onDelete={onDeleteBill}
                   />
                 ))}
               </div>
@@ -144,7 +146,8 @@ const BillList: React.FC<BillListProps> = ({ bills, onTogglePaid }) => {
                   <BillItem 
                     key={bill.id} 
                     bill={bill} 
-                    onTogglePaid={onTogglePaid} 
+                    onTogglePaid={onTogglePaid}
+                    onDelete={onDeleteBill}
                   />
                 ))}
               </div>
