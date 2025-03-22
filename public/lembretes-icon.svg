@@ -1,0 +1,14 @@
+<svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Círculo de fundo -->
+  <circle cx="100" cy="100" r="100" fill="#4A90E2"/>
+  <!-- Bloco de notas -->
+  <rect x="50" y="50" width="100" height="120" rx="10" fill="#FFFFFF"/>
+  <!-- Linhas do bloco de notas -->
+  <rect x="60" y="70" width="80" height="2" fill="#D3D3D3"/>
+  <rect x="60" y="90" width="80" height="2" fill="#D3D3D3"/>
+  <rect x="60" y="110" width="80" height="2" fill="#D3D3D3"/>
+  <rect x="60" y="130" width="80" height="2" fill="#D3D3D3"/>
+  <!-- Sino de notificação -->
+  <path d="M120 150 C120 155 115 160 100 160 C85 160 80 155 80 150" fill="#F5A623"/>
+  <path d="M90 150 L110 150 L110 120 C110 110 90 110 90 120 Z" fill="#F5A623"/>
+</svg>
